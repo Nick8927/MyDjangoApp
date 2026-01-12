@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from .models import Product, Review, CartItem
-from .forms import OrderForm, ReviewForm
+from .forms import OrderForm
 from .models import Order, OrderItem
 import random
 import logging
@@ -18,7 +18,7 @@ def home(request):
     latest_reviews = Review.objects.all().order_by('-created_at')[:3]
     return render(request, 'confectionery/home.html', {
         'title': 'Главная страница',
-        'welcome_message': 'Добро пожаловать в нашу кондитерскую!',
+        'welcome_message': 'Добро пожаловать!',
         'featured_products': featured_products,
         'reviews': latest_reviews
     })
