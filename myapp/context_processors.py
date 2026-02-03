@@ -1,9 +1,28 @@
+from django.db.models import Sum, F
 from .models import CartItem
 
 
-def cart_items_count(request):
+def cart_context(request):
+    """
+    Контекст корзины:
+    - количество товаров
+    - общая сумма
+    """
     if request.user.is_authenticated:
-        count = CartItem.objects.filter(user=request.user).count()
+        cart_items = CartItem.objects.filter(user=request.user)
+
+        items_count = cart_items.aggregate(
+            total_quantity=Sum('quantity')
+        )['total_quantity'] or 0
+
+        total_price = cart_items.aggregate(
+            total=Sum(F('quantity') * F('product__price'))
+        )['total'] or 0
     else:
-        count = 0
-    return {'cart_items_count': count}
+        items_count = 0
+        total_price = 0
+
+    return {
+        'cart_items_count': items_count,
+        'cart_total_price': total_price,
+    }
