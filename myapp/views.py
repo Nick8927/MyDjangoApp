@@ -44,16 +44,10 @@ def about(request):
 
 @login_required
 def cart_view(request):
-    cart_items = CartItem.objects.filter(user=request.user)
-    total = sum(item.product.price * item.quantity for item in cart_items)
-
-    for item in cart_items:
-        print(f"[CART] {item.product.name} — qty: {item.quantity}")
-
     return render(request, 'confectionery/cart.html', {
-        'cart_items': cart_items,
-        'total': total,
-        'cart_items_count': cart_items.count()
+        'cart_items': request.cart["items"],
+        'total': request.cart["total_price"],
+        'cart_items_count': request.cart["total_qty"]
     })
 
 
