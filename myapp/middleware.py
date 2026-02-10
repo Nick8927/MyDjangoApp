@@ -36,7 +36,10 @@ class RequestLogMiddleware:
 
 
 class CartMiddleware:
-    """Прокидывает корзину пользователя во все запросы"""
+    """
+    прод. версия  middleware для корзины.
+    Прокидывает агрегированное состояние корзины в request.cart
+    """
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -45,22 +48,29 @@ class CartMiddleware:
         request.cart = {
             "items": [],
             "total_qty": 0,
-            "total_price": 0
+            "total_price": 0,
+            "has_items": False,
         }
 
         if request.user.is_authenticated:
-            cart_items = CartItem.objects.filter(user=request.user)
-
-            totals = cart_items.aggregate(
-                total_qty=Sum("quantity"),
-                total_price=Sum(F("quantity") * F("product__price"))
+            cart_items = (
+                CartItem.objects
+                .filter(user=request.user)
+                .select_related("product")
             )
 
-            request.cart = {
-                "items": cart_items,
-                "total_qty": totals["total_qty"] or 0,
-                "total_price": totals["total_price"] or 0
-            }
+            if cart_items.exists():
+                totals = cart_items.aggregate(
+                    total_qty=Sum("quantity"),
+                    total_price=Sum(F("quantity") * F("product__price"))
+                )
+
+                request.cart = {
+                    "items": cart_items,
+                    "total_qty": totals["total_qty"] or 0,
+                    "total_price": totals["total_price"] or 0,
+                    "has_items": True,
+                }
 
         response = self.get_response(request)
         return response

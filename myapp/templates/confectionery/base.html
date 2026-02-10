@@ -15,75 +15,81 @@
 <body>
 <div class="wrapper">
 
-<header>
-    <div class="container">
-        <nav>
-            <div class="nav-links">
-                <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}">Главная</a>
-                <a href="{% url 'product_list' %}" class="{% if request.path == '/products/' %}active{% endif %}">Продукция</a>
-                <a href="{% url 'about' %}" class="{% if request.path == '/about/' %}active{% endif %}">О нас</a>
-                <a href="{% url 'reviews' %}" class="{% if request.path == '/reviews/' %}active{% endif %}">Отзывы</a>
-            </div>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="nav-links">
+                    <a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}">Главная</a>
+                    <a href="{% url 'product_list' %}" class="{% if request.path == '/products/' %}active{% endif %}">Продукция</a>
+                    <a href="{% url 'about' %}" class="{% if request.path == '/about/' %}active{% endif %}">О нас</a>
+                    <a href="{% url 'reviews' %}"
+                       class="{% if request.path == '/reviews/' %}active{% endif %}">Отзывы</a>
+                </div>
 
-            <div class="auth-links">
-                {% if user.is_authenticated %}
+                <div class="auth-links">
+                    {% if user.is_authenticated %}
                     <span class="username">Привет, {{ user.username }}!</span>
 
                     <a href="{% url 'cart' %}" class="cart-link">
-                        🛒 Корзина ({{ request.cart.total_qty }})<br>
+                        🛒 Корзина
+                        {% if request.cart.has_items %}
+                        ({{ request.cart.total_qty }})<br>
                         <small>{{ request.cart.total_price }} ₽</small>
+                        {% else %}
+                        <br><small> </small>
+                        {% endif %}
                     </a>
 
                     <form action="{% url 'logout' %}" method="post" class="logout-form">
                         {% csrf_token %}
                         <button type="submit" class="auth-link login-btn">Выйти</button>
                     </form>
-                {% else %}
+                    {% else %}
                     <a href="{% url 'login' %}" class="auth-link">Войти</a>
                     <a href="{% url 'register' %}" class="auth-link">Регистрация</a>
-                {% endif %}
-            </div>
-        </nav>
-    </div>
-</header>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+    </header>
 
-<main>
-    <div class="container">
+    <main>
+        <div class="container">
 
-        {% if messages %}
+            {% if messages %}
             <div class="messages">
                 {% for message in messages %}
-                    <div class="alert">{{ message }}</div>
+                <div class="alert">{{ message }}</div>
                 {% endfor %}
             </div>
-        {% endif %}
+            {% endif %}
 
-        {% block content %}{% endblock %}
-    </div>
-</main>
+            {% block content %}{% endblock %}
+        </div>
+    </main>
 
-<footer class="container">
-    <div class="social-links">
-        <a href="https://www.instagram.com/page/" target="_blank" rel="noopener">
-            <i class="fab fa-instagram"></i>
-        </a>
-        <a href="https://vk.com/page" target="_blank" rel="noopener">
-            <i class="fab fa-vk"></i>
-        </a>
-        <a href="https://t.me/page" target="_blank" rel="noopener">
-            <i class="fab fa-telegram"></i>
-        </a>
-    </div>
+    <footer class="container">
+        <div class="social-links">
+            <a href="https://www.instagram.com/page/" target="_blank" rel="noopener">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="https://vk.com/page" target="_blank" rel="noopener">
+                <i class="fab fa-vk"></i>
+            </a>
+            <a href="https://t.me/page" target="_blank" rel="noopener">
+                <i class="fab fa-telegram"></i>
+            </a>
+        </div>
 
-    <div class="contact-info">
-        <p>г. Минск, ул. Свободы, 20 | +375 (29) 222-22-22</p>
-        <p>Часы работы: 8:00 - 20:00 без выходных</p>
-    </div>
+        <div class="contact-info">
+            <p>г. Минск, ул. Свободы, 20 | +375 (29) 222-22-22</p>
+            <p>Часы работы: 8:00 - 20:00 без выходных</p>
+        </div>
 
-    <div class="copyright">
-        © Кондитерская <span id="current-year"></span>
-    </div>
-</footer>
+        <div class="copyright">
+            © Кондитерская <span id="current-year"></span>
+        </div>
+    </footer>
 
 </div>
 
