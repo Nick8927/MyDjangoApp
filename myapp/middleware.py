@@ -7,13 +7,9 @@ logger = logging.getLogger(__name__)
 
 
 class RequestLogMiddleware:
-    """
-    Логируем каждый запрос:
-    - путь
-    - метод
-    - пользователя
-    - время обработки
-    """
+    """ пишем логи для медленных запросов и ошибок"""
+
+    SLOW_REQUEST_THRESHOLD = 0.5  # секунды
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -25,19 +21,32 @@ class RequestLogMiddleware:
 
         duration = round(time.time() - start_time, 3)
 
-        user = request.user if request.user.is_authenticated else "Anonymous"
+        if request.path.startswith("/static/"):
+            return response
 
-        logger.info(
-            f"{request.method} {request.path} | "
-            f"user={user} | {duration}s | status={response.status_code}"
+        user = (
+            request.user.username
+            if request.user.is_authenticated
+            else "Anonymous"
         )
+
+        log_message = (
+            f"{request.method} {request.path} | "
+            f"user={user} | {duration}s | "
+            f"status={response.status_code}"
+        )
+
+        if response.status_code >= 400:
+            logger.warning(log_message)
+
+        elif duration > self.SLOW_REQUEST_THRESHOLD:
+            logger.info(f"SLOW REQUEST: {log_message}")
 
         return response
 
 
 class CartMiddleware:
-    """
-    прод. версия  middleware для корзины.
+    """ Прод. версия  middleware для корзины.
     Прокидывает агрегированное состояние корзины в request.cart
     """
 
