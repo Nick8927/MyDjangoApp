@@ -16,7 +16,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'myapp'
+    'myapp.apps.MyappConfig',
 ]
 
 MIDDLEWARE = [
@@ -130,3 +130,7 @@ LOGGING = {
         },
     },
 }
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "test@example.com"
+ADMIN_EMAIL = "admin@example.com"
