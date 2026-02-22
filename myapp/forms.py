@@ -15,8 +15,8 @@ class ReviewForm(forms.ModelForm):
         widgets = {
             'text': forms.Textarea(attrs={
                 'rows': 4,
-                'placeholder': 'Ваш отзыв...',
                 'maxlength': 100,
+                'placeholder': 'Максимум 100 символов'
             }),
             'rating': forms.NumberInput(attrs={
                 'min': 1,

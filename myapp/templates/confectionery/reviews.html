@@ -15,31 +15,38 @@
     {% if user.is_authenticated %}
     <div class="review-form">
         <h3>Оставить отзыв</h3>
+
         <form method="post">
             {% csrf_token %}
+
             <div class="form-wrapper">
+
                 <div class="form-element">
-                    <label for="id_text">Ваш отзыв:</label>
-                    <textarea id="id_text" name="text" rows="4" required></textarea>
+                    <label for="{{ form.text.id_for_label }}">Ваш отзыв:</label>
+                    {{ form.text }}
+                    {{ form.text.errors }}
                 </div>
+
                 <div class="form-element">
-                    <label for="id_rating">Оценка:</label>
-                    <select id="id_rating" name="rating">
-                        <option value="5">5 — Отлично</option>
-                        <option value="4">4 — Хорошо</option>
-                        <option value="3">3 — Средне</option>
-                        <option value="2">2 — Плохо</option>
-                        <option value="1">1 — Ужасно</option>
-                    </select>
+                    <label for="{{ form.rating.id_for_label }}">Оценка:</label>
+                    {{ form.rating }}
+                    {{ form.rating.errors }}
                 </div>
+
                 <div class="form-element">
-                    <button type="submit" class="btn btn-primary">Отправить</button>
+                    <button type="submit" class="btn btn-primary">
+                        Отправить
+                    </button>
                 </div>
+
             </div>
         </form>
     </div>
     {% else %}
-    <p>Чтобы оставить отзыв, пожалуйста <a href="{% url 'login' %}">войдите</a> в систему.</p>
+    <p>
+        Чтобы оставить отзыв, пожалуйста
+        <a href="{% url 'login' %}">войдите</a> в систему.
+    </p>
     {% endif %}
 
     <div class="reviews-list">
@@ -47,14 +54,18 @@
         <div class="review">
             <div class="review-header">
                 <strong>{{ review.author }}</strong>
+
                 <div class="rating">
                     {% for _ in "12345" %}
                         {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
                     {% endfor %}
                 </div>
             </div>
+
             <p class="review-text">{{ review.text }}</p>
-            <p class="review-date">{{ review.created_at|date:"d.m.Y H:i" }}</p>
+            <p class="review-date">
+                {{ review.created_at|date:"d.m.Y H:i" }}
+            </p>
         </div>
         {% empty %}
         <p>Пока нет отзывов. Будьте первым!</p>
