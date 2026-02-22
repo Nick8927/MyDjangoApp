@@ -3,16 +3,36 @@ from .models import Review, Order
 
 
 class ReviewForm(forms.ModelForm):
-    """форма отзыва"""
+    """Форма отзыва с ограничением длины текста
+    ограничение на уровне браузера и сервера (clean_text)
+    """
+
+    MAX_TEXT_LENGTH = 100
 
     class Meta:
         model = Review
         fields = ['text', 'rating']
         widgets = {
-            'text': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Ваш отзыв...'}),
-            'rating': forms.NumberInput(attrs={'min': 1, 'max': 5}),
+            'text': forms.Textarea(attrs={
+                'rows': 4,
+                'maxlength': 100,
+                'placeholder': 'Максимум 100 символов'
+            }),
+            'rating': forms.NumberInput(attrs={
+                'min': 1,
+                'max': 5
+            }),
         }
 
+    def clean_text(self):
+        text = self.cleaned_data.get('text')
+
+        if len(text) > self.MAX_TEXT_LENGTH:
+            raise forms.ValidationError(
+                f"Отзыв не должен превышать {self.MAX_TEXT_LENGTH} символов."
+            )
+
+        return text
 
 class OrderForm(forms.ModelForm):
     """форма заказа"""
