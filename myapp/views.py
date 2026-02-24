@@ -9,6 +9,8 @@ from .models import Order, OrderItem
 import random
 import logging
 from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +84,21 @@ def reviews(request):
             review = form.save(commit=False)
             review.author = request.user.username
             review.save()
+
+            try:
+                send_mail(
+                    subject='Новый отзыв на сайте',
+                    message=(
+                        f'Пользователь: {request.user.username}\n'
+                        f'Оценка: {review.rating}\n\n'
+                        f'Текст отзыва:\n{review.text}'
+                    ),
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[settings.EMAIL_HOST_USER],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                print(f'Ошибка отправки письма: {e}')
 
             messages.success(request, 'Ваш отзыв отправлен.')
             return redirect('reviews')

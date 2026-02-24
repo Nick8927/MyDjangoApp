@@ -34,6 +34,7 @@ class ReviewForm(forms.ModelForm):
 
         return text
 
+
 class OrderForm(forms.ModelForm):
     """форма заказа"""
 
