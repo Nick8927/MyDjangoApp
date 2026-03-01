@@ -178,8 +178,17 @@ def order_detail(request, order_id):
 
 @login_required
 def order_history(request):
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'confectionery/order_history.html', {'orders': orders})
+    orders = (
+        Order.objects
+        .filter(user=request.user)
+        .prefetch_related('items')
+        .order_by('-created_at')
+    )
+
+    return render(request, 'confectionery/order_history.html', {
+        'orders': orders,
+        'title': 'Мои заказы'
+    })
 
 
 def product_detail(request, pk):
