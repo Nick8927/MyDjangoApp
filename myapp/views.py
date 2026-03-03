@@ -132,10 +132,11 @@ def register(request):
 @login_required
 def order_view(request):
     cart_items = CartItem.objects.filter(user=request.user)
-    total = sum(item.product.price * item.quantity for item in cart_items)
 
     if not cart_items:
         return redirect('cart')
+
+    total = sum(item.product.price * item.quantity for item in cart_items)
 
     if request.method == 'POST':
         form = OrderForm(request.POST)
@@ -143,6 +144,7 @@ def order_view(request):
             order = form.save(commit=False)
             order.user = request.user
             order.order_number = f"{random.randint(100000, 999999)}"
+            order.total_price = total
             order.save()
 
             for item in cart_items:
@@ -152,7 +154,9 @@ def order_view(request):
                     quantity=item.quantity,
                     price=item.product.price
                 )
+
             cart_items.delete()
+
             return redirect('order_success', order_id=order.id)
     else:
         form = OrderForm()
@@ -178,8 +182,17 @@ def order_detail(request, order_id):
 
 @login_required
 def order_history(request):
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'confectionery/order_history.html', {'orders': orders})
+    orders = (
+        Order.objects
+        .filter(user=request.user)
+        .prefetch_related('items')
+        .order_by('-created_at')
+    )
+
+    return render(request, 'confectionery/order_history.html', {
+        'orders': orders,
+        'title': 'Мои заказы'
+    })
 
 
 def product_detail(request, pk):

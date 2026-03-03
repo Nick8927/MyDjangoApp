@@ -46,7 +46,7 @@ def notify_admin_about_new_order(sender, instance, created, **kwargs):
             f"Способ оплаты: {instance.get_payment_method_display()}\n"
             f"Статус: {instance.get_status_display()}\n"
             f"Оплачен: {'Да' if instance.is_paid else 'Нет'}\n"
-            f"Сумма заказа: {instance.total_price()} руб.\n"
+            f"Сумма заказа: {instance.total_price} руб.\n"
             f"Дата создания: {local_time.strftime('%d.%m.%Y %H:%M:%S')}"
         )
 
