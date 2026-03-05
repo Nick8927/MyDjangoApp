@@ -11,6 +11,7 @@ import logging
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
+import threading
 
 logger = logging.getLogger(__name__)
 
@@ -85,30 +86,21 @@ def reviews(request):
             review.author = request.user.username
             review.save()
 
-            try:
-                send_mail(
-                    subject='Новый отзыв на сайте',
-                    message=(
-                        f'Пользователь: {request.user.username}\n'
-                        f'Оценка: {review.rating}\n\n'
-                        f'Текст отзыва:\n{review.text}'
-                    ),
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[settings.EMAIL_HOST_USER],
-                    fail_silently=False,
-                )
-            except Exception as e:
-                print(f'Ошибка отправки письма: {e}')
+            threading.Thread(
+                target=send_review_email,
+                args=(request.user, review)
+            ).start()
 
             messages.success(request, 'Ваш отзыв отправлен.')
             return redirect('reviews')
+
         else:
-            messages.error(request, 'Пожалуйста, исправьте ошибки в форме.')
+            messages.error(request, 'Исправьте ошибки в форме.')
 
     else:
         form = ReviewForm()
 
-    reviews_list = Review.objects.all().order_by('-created_at')
+    reviews_list = Review.objects.all()
 
     return render(request, 'confectionery/reviews.html', {
         'form': form,
@@ -202,3 +194,17 @@ def product_detail(request, pk):
 
 def custom_404_view(request, exception):
     return render(request, 'confectionery/404.html', status=404)
+
+
+def send_review_email(user, review):
+    send_mail(
+        subject='Новый отзыв на сайте',
+        message=(
+            f'Пользователь: {user.username}\n'
+            f'Оценка: {review.rating}\n\n'
+            f'Текст отзыва:\n{review.text}'
+        ),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[settings.EMAIL_HOST_USER],
+        fail_silently=False,
+    )
