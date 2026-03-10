@@ -12,6 +12,8 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 import threading
+from django.utils import timezone
+from datetime import timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +84,47 @@ def reviews(request):
         form = ReviewForm(request.POST)
 
         if form.is_valid():
+
+            text = form.cleaned_data['text']
+            now = timezone.now()
+
+            last_review = Review.objects.filter(
+                author=request.user.username
+            ).order_by('-created_at').first()
+
+            if last_review and now - last_review.created_at < timedelta(minutes=5):
+                messages.error(
+                    request,
+                    "Можно оставлять только один отзыв каждые 5 минут."
+                )
+                return redirect('reviews')
+
+            one_hour_ago = now - timedelta(hours=1)
+
+            reviews_last_hour = Review.objects.filter(
+                author=request.user.username,
+                created_at__gte=one_hour_ago
+            ).count()
+
+            if reviews_last_hour >= 3:
+                messages.error(
+                    request,
+                    "Вы можете оставить максимум 3 отзыва в час."
+                )
+                return redirect('reviews')
+
+            duplicate_review = Review.objects.filter(
+                author=request.user.username,
+                text__iexact=text.strip()
+            ).exists()
+
+            if duplicate_review:
+                messages.error(
+                    request,
+                    "Вы уже оставляли такой отзыв."
+                )
+                return redirect('reviews')
+
             review = form.save(commit=False)
             review.author = request.user.username
             review.save()
