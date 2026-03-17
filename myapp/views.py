@@ -143,7 +143,7 @@ def reviews(request):
     else:
         form = ReviewForm()
 
-    reviews_list = Review.objects.all()
+    reviews_list = Review.objects.filter(is_approved=True)
 
     return render(request, 'confectionery/reviews.html', {
         'form': form,
