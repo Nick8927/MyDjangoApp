@@ -18,3 +18,10 @@ class ReviewAdmin(admin.ModelAdmin):
     list_display = ('author', 'rating', 'created_at', 'is_approved')
     list_filter = ('is_approved', 'rating')
     search_fields = ('author', 'text')
+
+    actions = ['approve_reviews']
+
+    def approve_reviews(self, request, queryset):
+        queryset.update(is_approved=True)
+
+    approve_reviews.short_description = "Одобрить выбранные отзывы"
